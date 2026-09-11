@@ -66,7 +66,8 @@ In practice, a safety property may correspond to a precondition, an optional pre
 |---|---|---|---|---|   
 | [Valid pointer](https://doc.rust-lang.org/nightly/std/ptr/index.html) | ValidPtr(p, T, len) | Size(T, 0) \|\| (!Size(T,0) && Deref(p, T, len) ) | precond | [ptr::read<T>()](https://doc.rust-lang.org/nightly/std/ptr/fn.read.html)  |       
 | Dereferenceable | Deref(p, T, len) | Allocated(p, T, len, *) && InBound(p, T, len) | precond | only used to define valid pointers |
-| Valid pointer to reference conversion | Ptr2Ref(p, T) | Init(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [ptr::as_uninit_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_uninit_ref) |
+| Valid pointer to reference conversion | Ptr2Ref(p, T) | Init(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_ref) |
+| Valid pointer to `MaybeUninit` reference | Ptr2RefUninit(p, T) | Typed(p, T) && ValidPtr(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_uninit_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_uninit_ref) |
 | Layout Consistency | Layout(p, layout) | ValidNum(rem(p, layout.align), 0) && Allocated(p, u8, layout.size, heap) | precond | [GlobalAlloc::realloc()](https://doc.rust-lang.org/nightly/std/alloc/trait.GlobalAlloc.html#method.realloc) | 
 
 ### 2.3 Synonymous SPs used in Rustdoc
