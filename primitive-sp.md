@@ -205,6 +205,8 @@ Example APIs: [CStr::from_bytes_with_nul_unchecked()](https://doc.rust-lang.org/
 #### 3.3.3 Initialization
 A safety property may require a range of memory pointed by a pointer `p` to be initialized. **Init(p, T, len) implies Typed(p, T)** — the memory must not only be of type `T` (type invariant), but also contain bit patterns that represent valid values of `T`. In contrast, a `MaybeUninit<T>` may satisfy Typed(p, T) yet fail Init(p, T, len) because its content is not yet initialized. In other words, Init is a strictly stronger condition than Typed: Typed requires only the *type invariant*, while Init additionally requires the memory content to be *valid for T*.
 
+**Init(p, T, len) implies NonNull(p), Allocated(p, T, len), and InBound(p, T, len)** — reading a valid `T` value at `p` is only possible when the pointer is non-null, points at live allocated memory, and stays in-bounds. Hence Init also subsumes the pointer-validity primitives.
+
 **psp III.4 Init(p, T, len)**:
 
 $$\forall i \in 0..len, \text{mem}(p + \text{sizeof}(T) * i, p + \text{sizeof}(T) * (i+1)) = \text{valid}(T) $$
