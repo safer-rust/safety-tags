@@ -151,7 +151,7 @@ Example APIs: [Arc::from_raw()](https://doc.rust-lang.org/std/sync/struct.Arc.ht
 
 Bounded access requires that the pointer access with respect to an offset stays within the bound of the same allocated object. This ensures that dereferencing the pointer yields a value (which may not yet be initialized) of the expected type T. 
 
-**psp II.3 InBound(p, T, len, arange)**: 
+**psp II.3 InBound(p, T, len)**: 
 
 $$\text{mem}(p, p+ sizeof(T) * len) \in single allocated object $$
 
