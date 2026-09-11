@@ -66,8 +66,8 @@ In practice, a safety property may correspond to a precondition, an optional pre
 |---|---|---|---|---|   
 | [Valid pointer](https://doc.rust-lang.org/nightly/std/ptr/index.html) | ValidPtr(p, T, len) | Size(T, 0) \|\| (!Size(T,0) && Deref(p, T, len) ) | precond | [ptr::read<T>()](https://doc.rust-lang.org/nightly/std/ptr/fn.read.html)  |       
 | Dereferenceable | Deref(p, T, len) | Allocated(p, T, len, *) && InBound(p, T, len) | precond | only used to define valid pointers |
-| Valid pointer to reference conversion | Ptr2Ref(p, T) | Init(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_ref) |
-| Valid pointer to `MaybeUninit` reference | Ptr2RefUninit(p, T) | Typed(p, T) && ValidPtr(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_uninit_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_uninit_ref) |
+| Valid pointer to reference conversion | Ptr2Ref(p, T) | Init(p, T, 1) && NonNull(p) && ValidPtr(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_ref) |
+| Valid pointer to `MaybeUninit` reference | Ptr2RefUninit(p, T) | Typed(p, T) && NonNull(p) && ValidPtr(p, T, 1) && Align(p, T) && Alias(p, ret) | precond, hazard | [NonNull::as_uninit_ref()](https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.as_uninit_ref) |
 | Layout Consistency | Layout(p, layout) | ValidNum(rem(p, layout.align), 0) && Allocated(p, u8, layout.size, heap) | precond | [GlobalAlloc::realloc()](https://doc.rust-lang.org/nightly/std/alloc/trait.GlobalAlloc.html#method.realloc) | 
 
 ### 2.3 Synonymous SPs used in Rustdoc
@@ -206,7 +206,7 @@ Example APIs: [CStr::from_bytes_with_nul_unchecked()](https://doc.rust-lang.org/
 #### 3.3.3 Initialization
 A safety property may require a range of memory pointed by a pointer `p` to be initialized. **Init(p, T, len) implies Typed(p, T)** — the memory must not only be of type `T` (type invariant), but also contain bit patterns that represent valid values of `T`. In contrast, a `MaybeUninit<T>` may satisfy Typed(p, T) yet fail Init(p, T, len) because its content is not yet initialized. In other words, Init is a strictly stronger condition than Typed: Typed requires only the *type invariant*, while Init additionally requires the memory content to be *valid for T*.
 
-**Init(p, T, len) implies NonNull(p), Allocated(p, T, len), and InBound(p, T, len)** — reading a valid `T` value at `p` is only possible when the pointer is non-null, points at live allocated memory, and stays in-bounds. Hence Init also subsumes the pointer-validity primitives.
+`Init(p, T, len)` concerns only the memory **content**. It does **not** subsume the pointer-validity primitives — non-nullness, allocation liveness, and in-boundsness are orthogonal (`NonNull`, `Allocated`, `InBound`) and must be stated separately when an operation dereferences the pointer. For example, the pointer-to-reference compound `Ptr2Ref(p, T)` (§2.2) requires `Init(p, T, 1) ∧ NonNull(p) ∧ ValidPtr(p, T, 1) ∧ Align(p, T) ∧ Alias(p)`.
 
 **psp III.4 Init(p, T, len)**:
 
